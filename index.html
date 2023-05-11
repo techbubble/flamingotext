@@ -114,7 +114,7 @@
                         lastWidth += space * scale;
                     }
                 }
-                if (lastWidth > canvas.width) {
+                if ((char == '\n') || (lastWidth > canvas.width)) {
                     row++;
                     firstChar = true;
                     lastWidth = 0;
