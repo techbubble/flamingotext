@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Flamingo Type">
+    <meta name="author" content="Nik Kalyani @techbubble">
+    <link rel="icon" href="favicon.png">
+
+    <title>Flamingo Type</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <style>
+        h4 { font-family: Bangers; font-size: 30px; color: #000; }
+
+        body {
+            background-color: #ededed;
+        }
+
+        #editor {
+            width: 1200px;
+            height: 1000px;
+            padding: 0;
+            margin: 0;
+            margin-top: 50px;
+            background-color: #ffffff;
+        }
+
+        #text {
+            width: 500px;
+            height: 100px;
+            margin-top: 20px;
+        }
+
+        #download {
+            margin-top: 20px;
+        }
+
+        .btn-huge { font-size: 3em; margin-left: 20px;}
+    </style>
+ </head>
+
+  <body>
+    <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <textarea id="text"></textarea>
+          </div>
+          <div class="col-md-6" style="text-align: center;">
+            <button class="btn btn-huge btn-primary" id="download">Download</button>
+        </div>
+        <div class="row">
+            <canvas id="editor"></canvas>
+        </div>
+    </div>
+        
+    
+    <div id="letters" style="display:none;"></div>"
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"  crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/oauth-io/0.6.2/oauth.min.js"></script>
+    <script>
+
+        let canvas = document.getElementById("editor");
+        let context = canvas.getContext('2d');
+        let space = 125;
+        const BASE_HEIGHT = 1000;
+        const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        //get DPI
+        let dpi = window.devicePixelRatio;
+        fix_dpi();
+        function fix_dpi() {
+            //get CSS height
+            //the + prefix casts it to an integer
+            //the slice method gets rid of "px"
+            let style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
+            let style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+
+            canvas.setAttribute('height', style_height * dpi);
+            canvas.setAttribute('width', style_width * dpi);
+        }
+
+        function showText(x, y, text, scale) {
+
+            let topOffset = 0;
+            let lastWidth = 0;
+            let row = 0;
+            let firstChar = true;
+
+            for(let i=0; i<text.length; i++) {
+                const char = text.charAt(i).toUpperCase();
+                if (ALPHABET.indexOf(char) > -1) {
+                    const img = document.getElementById(char);
+                    context.drawImage(img, lastWidth, (BASE_HEIGHT * scale) * row, img.width * scale, img.height * scale)
+                    lastWidth += (img.width + space) * scale;
+                    firstChar = false;
+                    
+                } else if (char == ' ') {
+                    if (!firstChar) {
+                        lastWidth += space * scale;
+                    }
+                }
+                if (lastWidth > canvas.width) {
+                    row++;
+                    firstChar = true;
+                    lastWidth = 0;
+                }
+            }
+        }
+
+        function redraw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            showText(0, 0, $('#text').val(), 0.5);
+        }
+
+
+        function download(canvas, filename) {
+            /// create an "off-screen" anchor tag
+            var lnk = document.createElement('a'), e;
+
+            /// the key here is to set the download attribute of the a tag
+            lnk.download = filename;
+
+            /// convert canvas content to data-uri for link. When download
+            /// attribute is set the content pointed to by link will be
+            /// pushed as "download" in HTML5 capable browsers
+            lnk.href = canvas.toDataURL("image/png;base64");
+
+            /// create a "fake" click-event to trigger the download
+            if (document.createEvent) {
+                e = document.createEvent("MouseEvents");
+                e.initMouseEvent("click", true, true, window,
+                                0, 0, 0, 0, 0, false, false, false,
+                                false, 0, null);
+
+                lnk.dispatchEvent(e);
+            } else if (lnk.fireEvent) {
+                lnk.fireEvent("onclick");
+            }
+        }
+
+        $(document).ready(function() {
+
+            $('#download').on('click', function() {
+               download(canvas, 'flamingo_text.png')
+            });
+
+            let letters = document.getElementById("letters");
+            let lettersDiv = document.getElementById('letters');
+
+            for(let c=0; c<26; c++) {
+                const char = ALPHABET.charAt(c);
+                const img = document.createElement("img"); // Use DOM HTMLImageElement
+                img.src = `images/${char}.png`; 
+                img.id = char
+                lettersDiv.appendChild(img);
+            }
+
+            $('textarea').on('keyup', function() { redraw(); });
+            $('#text').val('HELLO')
+            setTimeout(function(){
+                redraw();
+            }, 500);
+        });
+
+
+
+    
+    </script>
+</body>
+</html>
