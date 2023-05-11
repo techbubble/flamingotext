@@ -43,10 +43,23 @@
   <body>
     <div class="container">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <textarea id="text"></textarea>
+            Scale: <select id="scale">
+                <option>0.05</option>
+                <option>0.10</option>
+                <option>0.20</option>
+                <option>0.30</option>
+                <option>0.40</option>
+                <option selected>0.50</option>
+                <option>0.60</option>
+                <option>0.70</option>
+                <option>0.80</option>
+                <option>0.90</option>
+                <option>1.00</option>
+            </select>
           </div>
-          <div class="col-md-6" style="text-align: center;">
+          <div class="col-md-8" style="text-align: center;">
             <button class="btn btn-huge btn-primary" id="download">Download</button>
         </div>
         <div class="row">
@@ -81,13 +94,13 @@
             canvas.setAttribute('width', style_width * dpi);
         }
 
-        function showText(x, y, text, scale) {
+        function showText(x, y, text) {
 
             let topOffset = 0;
             let lastWidth = 0;
             let row = 0;
             let firstChar = true;
-
+            let scale = document.getElementById('scale').value;
             for(let i=0; i<text.length; i++) {
                 const char = text.charAt(i).toUpperCase();
                 if (ALPHABET.indexOf(char) > -1) {
@@ -111,7 +124,7 @@
 
         function redraw() {
             context.clearRect(0, 0, canvas.width, canvas.height);
-            showText(0, 0, $('#text').val(), 0.5);
+            showText(0, 0, $('#text').val());
         }
 
 
@@ -158,6 +171,7 @@
             }
 
             $('textarea').on('keyup', function() { redraw(); });
+            $('select').on('change', function() { redraw(); });
             $('#text').val('HELLO')
             setTimeout(function(){
                 redraw();
